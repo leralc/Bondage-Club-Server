@@ -2326,7 +2326,7 @@ function AccountOwnership(data, socket) {
 				Acc.Owner = "";
 				Acc.Ownership = null;
 				let O = { Ownership: Acc.Ownership, Owner: Acc.Owner };
-				Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, _res) { if (err) throw err; });
+				Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, res) { if (err) throw err; });
 				socket.emit("AccountOwnership", { ClearOwnership: true });
 				return;
 			}
@@ -2343,7 +2343,7 @@ function AccountOwnership(data, socket) {
 			Database.collection(AccountCollection).findOne({ MemberNumber : data.MemberNumber }, function(err, result) {
 				if (err) throw err;
 				if ((result != null) && (result.MemberNumber != null) && (result.MemberNumber === data.MemberNumber) && (result.Ownership != null) && (result.Ownership.MemberNumber === Acc.MemberNumber)) {
-					Database.collection(AccountCollection).updateOne({ AccountName : result.AccountName }, { $set: { Owner: "", Ownership: null } }, function(err, _res) { if (err) throw err; });
+					Database.collection(AccountCollection).updateOne({ AccountName : result.AccountName }, { $set: { Owner: "", Ownership: null } }, function(err, res) { if (err) throw err; });
 					ChatRoomMessage(Acc.ChatRoom, Acc.MemberNumber, "ReleaseSuccess", "ServerMessage", Acc.MemberNumber);
 					let Target = Account.find(A => A.MemberNumber === data.MemberNumber);
 					if (!Target) return;
@@ -2369,18 +2369,21 @@ function AccountOwnership(data, socket) {
 		    &&  TargetAcc.Ownership != null
 		    &&  TargetAcc.Ownership.MemberNumber == Acc.MemberNumber)
 		{
-			if (data.Notes != null  &&  typeof data.Notes === "string"  &&  data.Notes.length > 0) {
+			if (typeof data.Notes === "string"  &&  data.Notes.length > 0) {
 				// FIXME: This isn't fully Unicode-aware.
 				TargetAcc.Ownership.Notes = data.Notes.slice (0, 10000);
 			} else {
 				TargetAcc.Ownership.Notes = null;
 			}
 			let O = { Ownership: TargetAcc.Ownership, Owner: TargetAcc.Owner };
-			Database.collection(AccountCollection).updateOne ({ AccountName: TargetAcc.AccountName },
-			                                                  { $set: O },
-			                                                  function (err, _res) { if (err) throw err; });
-			socket.emit ("AccountOwnership", O);
-			ChatRoomSyncCharacter (Acc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
+			Database.collection(AccountCollection).updateOne (
+				{ AccountName: TargetAcc.AccountName },
+				{ $set: O },
+				function (err, _res) {
+					if (err) throw err;
+					socket.emit ("AccountOwnership", O);
+					ChatRoomSyncCharacter (Acc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
+				});
 			return;
 		}
 
@@ -2390,7 +2393,7 @@ function AccountOwnership(data, socket) {
 			TargetAcc.Owner = "";
 			TargetAcc.Ownership = null;
 			let O = { Ownership: TargetAcc.Ownership, Owner: TargetAcc.Owner };
-			Database.collection(AccountCollection).updateOne({ AccountName : TargetAcc.AccountName }, { $set: O }, function(err, _res) { if (err) throw err; });
+			Database.collection(AccountCollection).updateOne({ AccountName : TargetAcc.AccountName }, { $set: O }, function(err, res) { if (err) throw err; });
 			TargetAcc.Socket.emit("AccountOwnership", { ClearOwnership: true });
 			ChatRoomMessage(Acc.ChatRoom, Acc.MemberNumber, isTrial ? "EndOwnershipTrial" : "EndOwnership", "ServerMessage", null, [
 				{ Tag: "SourceCharacter", Text: Acc.Name, MemberNumber: Acc.MemberNumber },
@@ -2454,7 +2457,7 @@ function AccountOwnership(data, socket) {
 						Acc.Owner = "";
 						Acc.Ownership = { MemberNumber: data.MemberNumber, Name: TargetAcc.Name, Start: CommonTime(), Stage: 0 };
 						let O = { Ownership: Acc.Ownership, Owner: Acc.Owner };
-						Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, _res) { if (err) throw err; });
+						Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, res) { if (err) throw err; });
 						socket.emit("AccountOwnership", O);
 						ChatRoomMessage(Acc.ChatRoom, Acc.MemberNumber, "StartTrial", "ServerMessage", null, [{ Tag: "SourceCharacter", Text: Acc.Name, MemberNumber: Acc.MemberNumber }]);
 						ChatRoomSyncCharacter(Acc.ChatRoom, Acc.MemberNumber, Acc.MemberNumber);
@@ -2471,7 +2474,7 @@ function AccountOwnership(data, socket) {
 						Acc.Owner = TargetAcc.Name;
 						Acc.Ownership = { MemberNumber: data.MemberNumber, Name: TargetAcc.Name, Start: CommonTime(), Stage: 1 };
 						let O = { Ownership: Acc.Ownership, Owner: Acc.Owner };
-						Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, _res) { if (err) throw err; });
+						Database.collection(AccountCollection).updateOne({ AccountName : Acc.AccountName }, { $set: O }, function(err, res) { if (err) throw err; });
 						socket.emit("AccountOwnership", O);
 						ChatRoomMessage(Acc.ChatRoom, Acc.MemberNumber, "EndTrial", "ServerMessage", null, [{ Tag: "SourceCharacter", Text: Acc.Name, MemberNumber: Acc.MemberNumber }]);
 						ChatRoomSyncCharacter(Acc.ChatRoom, Acc.MemberNumber, Acc.MemberNumber);
