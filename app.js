@@ -2370,7 +2370,7 @@ function AccountOwnership(data, socket) {
 		) {
 			if (typeof data.Notes === "string" && data.Notes.length > 0) {
 				// FIXME: This isn't fully Unicode-aware.
-				TargetAcc.Ownership.Notes = data.Notes.slice(0, 10000);
+				TargetAcc.Ownership.Notes = data.Notes.slice(0, 4000);
 			} else {
 				TargetAcc.Ownership.Notes = undefined;
 			}
