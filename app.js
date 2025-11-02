@@ -2358,30 +2358,30 @@ function AccountOwnership(data, socket) {
 			});
 		}
 
-
 		// Exit if there's no target
 		if (!TargetAcc) return;
 
 		// The dominant is setting/updating public notes on their fully owned submissive.
-		if (    data.Action === "UpdateNotes"
-		    &&  TargetAcc.Ownership != null
-		    &&  TargetAcc.Ownership.Stage === 1
-		    &&  TargetAcc.Ownership.MemberNumber == Acc.MemberNumber)
-		{
-			if (typeof data.Notes === "string"  &&  data.Notes.length > 0) {
+		if (
+			data.Action === "UpdateNotes"
+			&& TargetAcc.Ownership != null
+			&& TargetAcc.Ownership.Stage === 1
+			&& TargetAcc.Ownership.MemberNumber == Acc.MemberNumber
+		) {
+			if (typeof data.Notes === "string" && data.Notes.length > 0) {
 				// FIXME: This isn't fully Unicode-aware.
-				TargetAcc.Ownership.Notes = data.Notes.slice (0, 10000);
+				TargetAcc.Ownership.Notes = data.Notes.slice(0, 10000);
 			} else {
 				TargetAcc.Ownership.Notes = undefined;
 			}
 			let O = { Ownership: TargetAcc.Ownership, Owner: TargetAcc.Owner };
-			Database.collection(AccountCollection).updateOne (
+			Database.collection(AccountCollection).updateOne(
 				{ AccountName: TargetAcc.AccountName },
 				{ $set: O },
-				function (err, _res) {
+				function(err, _res) {
 					if (err) throw err;
-					socket.emit ("AccountOwnership", O);
-					ChatRoomSyncCharacter (Acc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
+					socket.emit("AccountOwnership", O);
+					ChatRoomSyncCharacter(Acc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
 				});
 			return;
 		}
