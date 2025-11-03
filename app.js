@@ -2380,8 +2380,8 @@ function AccountOwnership(data, socket) {
 				{ $set: O },
 				function(err, _res) {
 					if (err) throw err;
-					socket.emit("AccountOwnership", O);
-					ChatRoomSyncCharacter(Acc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
+					TargetAcc.Socket.emit("AccountOwnership", O);
+					ChatRoomSyncCharacter(TargetAcc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
 				});
 			return;
 		}
