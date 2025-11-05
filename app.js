@@ -2356,11 +2356,35 @@ function AccountOwnership(data, socket) {
 					}
 				} else ChatRoomMessage(Acc.ChatRoom, Acc.MemberNumber, "ReleaseFail", "ServerMessage", Acc.MemberNumber);
 			});
-
 		}
 
 		// Exit if there's no target
 		if (!TargetAcc) return;
+
+		// The dominant is setting/updating public notes on their fully owned submissive.
+		if (
+			data.Action === "UpdateNotes"
+			&& TargetAcc.Ownership != null
+			&& TargetAcc.Ownership.Stage === 1
+			&& TargetAcc.Ownership.MemberNumber == Acc.MemberNumber
+		) {
+			if (typeof data.Notes === "string" && data.Notes.length > 0) {
+				// FIXME: This isn't fully Unicode-aware.
+				TargetAcc.Ownership.Notes = data.Notes.slice(0, 4000);
+			} else {
+				TargetAcc.Ownership.Notes = undefined;
+			}
+			let O = { Ownership: TargetAcc.Ownership, Owner: TargetAcc.Owner };
+			Database.collection(AccountCollection).updateOne(
+				{ AccountName: TargetAcc.AccountName },
+				{ $set: O },
+				function(err, _res) {
+					if (err) throw err;
+					TargetAcc.Socket.emit("AccountOwnership", O);
+					ChatRoomSyncCharacter(TargetAcc.ChatRoom, TargetAcc.MemberNumber, TargetAcc.MemberNumber);
+				});
+			return;
+		}
 
 		// The dominant can release the submissive player at any time
 		if (data.Action === "Release" && TargetAcc.Ownership != null && TargetAcc.Ownership.MemberNumber === Acc.MemberNumber) {
